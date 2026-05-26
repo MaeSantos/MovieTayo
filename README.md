@@ -71,6 +71,13 @@ Open:
 
 If the browser blocks requests due to CORS, ensure the backend allows origins (it currently allows `*`).
 
+### 2b) Admin app
+The admin console is a React + Vite + Tailwind + shadcn/ui SPA, also installable as a PWA. With the backend running, open:
+
+- `http://localhost:8001/admin/`
+
+The default token is `admin`; override it by setting `MOVIETAYO_ADMIN_TOKEN` in your backend environment. To modify or extend the admin app, see `admin-app/README.md` — source lives in `admin-app/`, the production build is committed to `admin/` so the backend serves it out of the box.
+
 The frontend reads `frontend\api-config.js` first. Leave it empty for local fallback URLs, or set it with:
 
 ```bat
