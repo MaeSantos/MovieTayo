@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+backend/.venv/
+
+# Local environment and secrets
+.env
+.env.*
+backend/.env.local
+!backend/.env.example
+
+# Runtime data and logs
+*.log
+backend/*.log
+backend/*.db
+
+# Android / Gradle generated files
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+
+# IDE and local tooling
+.idea/
+.sixth/
+docs/
+
+# OS clutter
+Thumbs.db
+.DS_Store

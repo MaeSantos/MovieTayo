@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+  <title>MovieTayo — Your Cinema Reflection</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="api-config.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+      --bg-color: #020617;
+      --card-bg: #0f172a;
+      --accent: #3b82f6;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-color);
+      color: #f8fafc;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: contain;
+    }
+
+    .glass-nav {
+      background: rgba(2, 6, 23, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .hero-gradient {
+      background: linear-gradient(to bottom, rgba(2, 6, 23, 0) 0%, rgba(2, 6, 23, 0.8) 70%, rgba(2, 6, 23, 1) 100%);
+    }
+
+    .card-zoom:active {
+      transform: scale(0.96);
+    }
+
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-in {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    .tab-active {
+      color: var(--accent);
+    }
+
+    .tab-active i {
+      transform: translateY(-2px);
+      filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body class="selection:bg-blue-500/30">
+
+  <!-- Mobile Top Bar -->
+  <header class="fixed top-0 left-0 right-0 z-40 px-6 py-4 flex items-center justify-between glass-nav md:hidden">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+        <i class="fas fa-play text-white text-xs"></i>
+      </div>
+      <span class="font-bold text-lg tracking-tight">Movie<span class="text-blue-500">Tayo</span></span>
+    </div>
+    <button onclick="toggleSearch()" class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center border border-slate-800">
+      <i class="fas fa-search text-slate-400"></i>
+    </button>
+  </header>
+
+  <!-- Desktop Sidebar -->
+  <aside class="hidden md:flex fixed left-0 top-0 bottom-0 w-64 flex-col bg-slate-950 border-r border-slate-900 p-6 z-50">
+    <div class="flex items-center gap-3 mb-10 px-2">
+      <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/40">
+        <i class="fas fa-play text-white"></i>
+      </div>
+      <span class="font-extrabold text-xl tracking-tight text-white">Movie<span class="text-blue-500">Tayo</span></span>
+    </div>
+
+    <nav class="space-y-2 flex-1">
+      <button onclick="showTab('explore')" id="dt-tab-explore" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition-all font-medium text-left">
+        <i class="fas fa-compass w-5"></i> Explore
+      </button>
+      <button onclick="showTab('recs')" id="dt-tab-recs" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition-all font-medium text-left">
+        <i class="fas fa-sparkles w-5"></i> For You
+      </button>
+      <button onclick="showTab('library')" id="dt-tab-library" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white transition-all font-medium text-left">
+        <i class="fas fa-bookmark w-5"></i> My Library
+      </button>
+    </nav>
+
+    <div class="mt-auto p-4 bg-slate-900/50 rounded-2xl border border-slate-800">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-2 h-2 rounded-full bg-green-500" id="dt-status-dot"></div>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500" id="dt-status-text">Ready</span>
+      </div>
+      <p class="text-[10px] text-slate-500 leading-tight">Backend: localhost:8000</p>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="md:ml-64 min-h-screen pb-24 md:pb-8">
+
+    <!-- Hero Section -->
+    <section id="hero" class="relative h-[45vh] md:h-[55vh] overflow-hidden">
+      <div class="absolute inset-0 bg-[url('https://image.tmdb.org/t/p/w1280/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg')] bg-cover bg-center scale-105"></div>
+      <div class="absolute inset-0 hero-gradient"></div>
+      <div class="absolute bottom-0 left-0 right-0 p-6 md:p-12">
+        <span class="bg-blue-600 text-[10px] font-black px-2 py-1 rounded mb-4 inline-block uppercase tracking-widest text-white">Featured</span>
+        <h1 class="text-4xl md:text-6xl font-black mb-4 tracking-tighter text-white">Blade Runner 2049</h1>
+        <div class="flex items-center gap-4 mb-6 text-slate-300">
+          <span class="text-sm font-semibold text-white">2017</span>
+          <span class="w-1 h-1 rounded-full bg-slate-500"></span>
+          <span class="text-sm font-semibold text-white">Sci-Fi / Action</span>
+        </div>
+        <div class="flex gap-3">
+          <button class="bg-white text-black px-8 py-3 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-slate-200 transition-all">
+            <i class="fas fa-play"></i> Watch Now
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div class="px-6 py-8">
+
+      <!-- Search Bar -->
+      <div id="searchContainer" class="hidden md:block mb-10 sticky top-4 z-30 transition-all duration-300">
+        <div class="relative max-w-2xl">
+          <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+          <input id="search" type="text" placeholder="Search movies, series, or anime..."
+            class="w-full bg-slate-900 border border-slate-800 rounded-2xl py-4 pl-14 pr-6 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-sm shadow-2xl text-white" />
+        </div>
+      </div>
+
+      <!-- Explore Section -->
+      <section id="sec-explore" class="tab-content animate-in text-left">
+        <h2 class="text-2xl font-bold tracking-tight mb-6 text-white">Browse Catalog</h2>
+        <div id="searchResults" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
+      </section>
+
+      <!-- Library Section -->
+      <section id="sec-library" class="tab-content hidden animate-in text-left">
+        <div class="flex items-center justify-between mb-6 pt-12 md:pt-0">
+          <h2 class="text-2xl font-bold tracking-tight text-white">My Reflections</h2>
+          <span id="libraryCount" class="text-sm font-bold text-slate-500 text-white">0 items</span>
+        </div>
+        <div id="savedList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+      </section>
+
+      <!-- Recommendations Section -->
+      <section id="sec-recs" class="tab-content hidden animate-in text-left">
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 pt-12 md:pt-0 gap-4">
+          <div>
+            <h2 class="text-2xl font-bold tracking-tight mb-1 text-white">Made For You</h2>
+            <p class="text-slate-400 text-xs text-white/70">Based on your library and reflections</p>
+          </div>
+          <div class="flex items-center gap-3">
+             <select id="limit" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-xs focus:outline-none text-white">
+                <option value="5">5 results</option>
+                <option value="10" selected>10 results</option>
+              </select>
+              <button id="btnRecommend" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+                <i class="fas fa-wand-magic-sparkles text-white"></i> Refresh
+              </button>
+          </div>
+        </div>
+        <div id="recsResults" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Reflection Modal -->
+  <div id="reflectionOverlay" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-sm animate-in">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-bold tracking-tight text-white" id="modalTitle">My Reflection</h3>
+        <button onclick="closeReflection()" class="text-slate-500 hover:text-white transition-colors text-white"><i class="fas fa-times text-lg"></i></button>
+      </div>
+      <p id="modalMovieTitle" class="text-blue-500 font-bold text-sm mb-4 uppercase tracking-widest"></p>
+      <textarea id="reflectionText" placeholder="What did this movie make you think about? Share your reflection..."
+        class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 min-h-[200px] resize-none mb-6 text-white"></textarea>
+      <button id="btnSaveReflection" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-900/20 active:scale-95 text-white">
+        Save Reflection
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="fixed bottom-0 left-0 right-0 z-50 glass-nav md:hidden safe-bottom">
+    <div class="flex items-center justify-around py-3 px-2">
+      <button onclick="showTab('explore')" id="tab-explore" class="flex flex-col items-center gap-1 text-slate-500 py-1 px-4">
+        <i class="fas fa-compass text-xl"></i>
+        <span class="text-[10px] font-bold uppercase tracking-widest text-white">Explore</span>
+      </button>
+      <button onclick="showTab('recs')" id="tab-recs" class="flex flex-col items-center gap-1 text-slate-500 py-1 px-4">
+        <i class="fas fa-sparkles text-xl"></i>
+        <span class="text-[10px] font-bold uppercase tracking-widest text-white">AI Picks</span>
+      </button>
+      <button onclick="showTab('library')" id="tab-library" class="flex flex-col items-center gap-1 text-slate-500 py-1 px-4">
+        <i class="fas fa-bookmark text-xl"></i>
+        <span class="text-[10px] font-bold uppercase tracking-widest text-white">Library</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-24 md:bottom-10 right-6 z-[60] glass-nav border border-slate-800 p-4 rounded-2xl shadow-2xl flex items-center gap-4 transition-all duration-500 translate-x-[120%] opacity-0">
+    <div id="toastIcon" class="w-10 h-10 rounded-xl flex items-center justify-center"></div>
+    <div>
+      <h4 id="toastTitle" class="font-bold text-sm text-white"></h4>
+      <p id="toastSub" class="text-xs text-slate-400 text-white"></p>
+    </div>
+  </div>
+
+  <script>
+    const userId = "demo";
+    const $ = (id) => document.getElementById(id);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+
+    // Automatically detect backend URL
+    const API_BASE = window.MOVIETAYO_API_BASE || (isAndroid ? "http://10.0.2.2:8001" : "http://localhost:8001");
+
+    let currentTab = 'explore';
+    let activeMovieId = null;
+
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      $(`sec-${tabId}`).classList.remove('hidden');
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('tab-active', 'text-blue-500'));
+      document.querySelectorAll('nav button').forEach(b => b.classList.add('text-slate-500'));
+      $(`tab-${tabId}`).classList.add('tab-active', 'text-blue-500');
+      $(`tab-${tabId}`).classList.remove('text-slate-500');
+      document.querySelectorAll('aside button').forEach(b => {
+        b.classList.remove('bg-slate-900', 'text-white');
+        b.classList.add('text-slate-400');
+      });
+      $(`dt-tab-${tabId}`).classList.add('bg-slate-900', 'text-white');
+      $(`dt-tab-${tabId}`).classList.remove('text-slate-400');
+      $('hero').style.display = tabId === 'explore' ? 'block' : 'none';
+      currentTab = tabId;
+      if (tabId === 'library') loadSaved();
+      if (tabId === 'recs') recommend();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleSearch() {
+      const container = $('searchContainer');
+      if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
+        container.classList.add('fixed', 'inset-x-0', 'top-0', 'bg-slate-950', 'p-4', 'z-[100]', 'animate-in');
+        $('search').focus();
+      } else {
+        container.classList.add('hidden');
+        container.classList.remove('fixed', 'inset-x-0', 'top-0', 'bg-slate-950', 'p-4', 'z-[100]', 'animate-in');
+      }
+    }
+
+    async function api(path, opts = {}) {
+      try {
+        const res = await fetch(API_BASE + path, {
+          headers: { "Content-Type": "application/json" },
+          ...opts
+        });
+        if (!res.ok) throw new Error(await res.text() || res.statusText);
+        return res.json();
+      } catch (err) {
+        showToast("Connection Error", "Check backend", "error");
+        throw err;
+      }
+    }
+
+    function showToast(title, sub, type = "success") {
+      const toast = $('toast');
+      const icon = $('toastIcon');
+      $('toastTitle').textContent = title;
+      $('toastSub').textContent = sub;
+      icon.className = `w-10 h-10 rounded-xl flex items-center justify-center ${type === 'error' ? 'bg-rose-500/20 text-rose-500' : 'bg-emerald-500/20 text-emerald-500'}`;
+      icon.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>`;
+      toast.classList.remove('translate-x-[120%]', 'opacity-0');
+      setTimeout(() => toast.classList.add('translate-x-[120%]', 'opacity-0'), 3000);
+    }
+
+    function openReflection(id, title, currentReflection = "") {
+      activeMovieId = id;
+      $('modalMovieTitle').textContent = title;
+      $('reflectionText').value = currentReflection;
+      $('reflectionOverlay').classList.remove('hidden');
+      $('reflectionText').focus();
+    }
+
+    function closeReflection() {
+      $('reflectionOverlay').classList.add('hidden');
+      activeMovieId = null;
+    }
+
+    $('btnSaveReflection').onclick = async () => {
+      const text = $('reflectionText').value;
+      try {
+        await api(`/api/watchlist/save`, {
+          method: 'POST',
+          body: JSON.stringify({ content_id: activeMovieId, liked: true, reflection: text })
+        });
+        showToast("Reflection Saved", "Stored locally");
+        closeReflection();
+        if (currentTab === 'library') loadSaved();
+        if (currentTab === 'explore') doSearch();
+      } catch (e) {}
+    };
+
+    function svgEscape(value) {
+      return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    function generatedPosterDataUrl(item) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900">
+        <rect width="600" height="900" fill="#0f172a"/>
+        <text x="300" y="450" text-anchor="middle" fill="#334155" font-size="40" font-family="sans-serif" font-weight="bold">${svgEscape(item.title)}</text>
+      </svg>`;
+      return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+    }
+
+    function posterSources(item) {
+      const sources = [];
+      const url = item.image_url;
+      if (url) {
+        // Use weserv.nl as the PRIMARY source because it handles SSL handshake and CORS for the WebView
+        const cleanUrl = url.replace(/^https?:\/\//, '');
+        sources.push(`https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&w=600&h=900&fit=cover`);
+        sources.push(url); // Direct fallback
+      }
+      sources.push(generatedPosterDataUrl(item));
+      return sources;
+    }
+
+    function jsArg(value) {
+      return JSON.stringify(value || "").replace(/'/g, "&#39;");
+    }
+
+    window.tryNextPosterSource = function(img) {
+      const sources = JSON.parse(img.dataset.sources || '[]');
+      let nextIndex = Number(img.dataset.sourceIndex || 0) + 1;
+      if (nextIndex < sources.length) {
+        img.dataset.sourceIndex = String(nextIndex);
+        img.src = sources[nextIndex];
+      } else {
+        const fb = img.parentElement.querySelector('.img-fallback');
+        if(fb) fb.classList.remove('hidden');
+        img.classList.add('hidden');
+      }
+    }
+
+    function createCard(it, savedData = null) {
+      const el = document.createElement('div');
+      const sources = posterSources(it);
+      const encodedSources = JSON.stringify(sources).replace(/"/g, '&quot;');
+
+      if (currentTab === 'library' && savedData) {
+        el.className = 'bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden flex flex-col shadow-xl animate-in';
+        el.innerHTML = `
+          <div class="flex gap-4 p-4">
+            <div class="relative w-24 aspect-[2/3] rounded-xl overflow-hidden shadow-lg border border-slate-800 flex-shrink-0">
+               <div class="absolute inset-0 bg-slate-800 animate-pulse img-loading"></div>
+               <div class="absolute inset-0 bg-slate-900 hidden img-fallback flex items-center justify-center p-2"><i class="fas fa-film text-xl text-slate-700"></i></div>
+               <img src="${sources[0]}" data-sources="${encodedSources}" data-source-index="0" class="w-full h-full object-cover opacity-0 transition-opacity" onload="this.classList.remove('opacity-0'); this.parentElement.querySelector('.img-loading')?.remove()" onerror="tryNextPosterSource(this)">
+            </div>
+            <div class="flex-1 min-w-0 text-left">
+              <span class="text-[9px] font-black text-blue-500 uppercase mb-1 block">${it.kind}</span>
+              <h3 class="font-bold text-lg leading-tight truncate mb-2 text-white">${it.title}</h3>
+              <p class="text-[10px] text-slate-500 truncate text-white">${it.genres}</p>
+            </div>
+          </div>
+          <div class="px-4 pb-4">
+            <div class="bg-slate-950/50 rounded-2xl p-4 border border-slate-800/50 min-h-[120px] relative text-left">
+              <button onclick="openReflection(${it.id}, ${jsArg(it.title)}, ${jsArg(savedData.reflection || '')})" class="absolute top-3 right-3 text-slate-600 hover:text-white transition-colors text-xs text-white"><i class="fas fa-pen"></i></button>
+              <p class="text-sm text-slate-300 italic leading-relaxed line-clamp-4 text-white">${savedData.reflection || 'No thoughts recorded yet...'}</p>
+            </div>
+          </div>`;
+      } else {
+        el.className = 'group card-zoom cursor-pointer transition-all duration-300';
+        const scoreBadge = it.score ? `<div class="absolute top-2 left-2 bg-blue-600 text-[9px] font-black px-1.5 py-0.5 rounded shadow-lg z-10 text-white">MATCH ${Math.round(it.score*100)}%</div>` : '';
+        el.innerHTML = `
+          <div class="relative aspect-[2/3] rounded-2xl overflow-hidden mb-3 shadow-lg border border-slate-800 group-hover:border-blue-500/50 transition-all">
+            <div class="absolute inset-0 bg-slate-800 animate-pulse img-loading"></div>
+            <div class="absolute inset-0 bg-slate-900 hidden img-fallback flex items-center justify-center p-4 text-center"><i class="fas fa-film text-3xl text-slate-700"></i></div>
+            <img src="${sources[0]}" data-sources="${encodedSources}" data-source-index="0" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-0 transition-opacity" onload="this.classList.remove('opacity-0'); this.parentElement.querySelector('.img-loading')?.remove()" onerror="tryNextPosterSource(this)">
+            ${scoreBadge}
+            <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4 text-center">
+               <p class="text-[10px] text-slate-200 line-clamp-3 mb-4 font-medium italic text-white">"${it.synopsis || ''}"</p>
+               <button onclick="openReflection(${it.id}, ${jsArg(it.title)})" class="w-full py-2.5 bg-blue-600 text-white text-[10px] font-black rounded-xl uppercase shadow-xl shadow-blue-900/40 text-white">Add Reflection</button>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-bold text-xs truncate mb-1 group-hover:text-blue-400 transition-colors text-white text-left">${it.title}</h3>
+            <div class="flex items-center justify-between text-left">
+              <span class="text-[9px] text-slate-500 font-bold uppercase tracking-tighter text-white">${it.kind}</span>
+              ${it.genres === 'Internet Result' ? '<span class="text-[8px] bg-blue-900/30 text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-tighter border border-blue-500/20">Live</span>' : ''}
+            </div>
+          </div>`;
+      }
+      return el;
+    }
+
+    async function loadSaved() {
+      const host = $("savedList");
+      host.innerHTML = Array(4).fill(0).map(() => `<div class="h-48 rounded-3xl skeleton"></div>`).join('');
+      try {
+        const savedData = await api(`/api/watchlist?user_id=${encodeURIComponent(userId)}`);
+        $('libraryCount').textContent = `${savedData.length} items`;
+        if (!savedData.length) { host.innerHTML = `<div class="col-span-full py-20 text-center text-slate-600"><p class="text-sm text-white">Your library is empty</p></div>`; return; }
+        const catalogData = await api(`/api/catalog`);
+        const byId = new Map(catalogData.map(c => [c.id, c]));
+        host.innerHTML = "";
+        savedData.forEach(s => { const it = byId.get(s.content_id); if (it) host.appendChild(createCard(it, s)); });
+      } catch (e) { host.innerHTML = ""; }
+    }
+
+    async function recommend() {
+      const host = $("recsResults");
+      host.innerHTML = Array(5).fill(0).map(() => `<div class="aspect-[2/3] rounded-2xl skeleton"></div>`).join('');
+      try {
+        const data = await api(`/api/recommendations?user_id=${encodeURIComponent(userId)}&limit=${$("limit").value}`);
+        host.innerHTML = "";
+        if (!data.recommendations.length) { host.innerHTML = `<div class="col-span-full py-20 text-center text-slate-600"><p class="text-sm text-white">Save reflections to get picks</p></div>`; return; }
+        data.recommendations.forEach(r => host.appendChild(createCard(r)));
+      } catch (e) { host.innerHTML = ""; }
+    }
+
+    async function doSearch() {
+      const q = $("search").value.trim();
+      const host = $("searchResults");
+      try {
+        const items = q ? await api(`/api/catalog/search?q=${encodeURIComponent(q)}`) : (await api(`/api/catalog`)).slice(0, 15);
+        host.innerHTML = "";
+        items.length ? items.forEach(it => host.appendChild(createCard(it))) : host.innerHTML = `<div class="col-span-full text-center text-slate-500 py-10 text-white">No results found</div>`;
+      } catch (e) {}
+    }
+
+    let searchTimeout;
+    $("search").addEventListener('input', () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(doSearch, 400); });
+    $("btnRecommend").addEventListener('click', recommend);
+    (async function init() {
+      try {
+        await api(`/health`);
+        $('dt-status-dot').className = "w-2 h-2 rounded-full bg-green-500";
+        showTab('explore');
+        doSearch();
+      } catch (e) {
+        $('dt-status-dot').className = "w-2 h-2 rounded-full bg-rose-500";
+      }
+    })();
+  </script>
+</body>
+</html>
