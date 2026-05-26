@@ -106,4 +106,3 @@ When using ngrok, rebuild/install the APK after `start_app.bat ngrok` so the bun
 - `POST /api/watchlist/save` (body: `{content_id, liked, reflection}`)
 - `GET /api/watchlist?user_id=demo`
 - `GET /api/recommendations?user_id=demo&limit=10`
-
