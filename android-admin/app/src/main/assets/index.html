@@ -1,0 +1,1015 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>MovieTayo Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="api-config.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=SF+Pro+Display:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Warmer, more human color palette */
+      --bg-warm: #1a1a2e;
+      --bg-softer: #16213e;
+      --bg-card: #0f3460;
+      --accent-warm: #e94560;
+      --accent-soft: #533483;
+      --accent-blue: #4361ee;
+      --text-primary: #f8f9fa;
+      --text-secondary: #a8b2d1;
+      --text-muted: #6c757d;
+      --success: #20c997;
+      --warning: #fd7e14;
+      --danger: #dc3545;
+      --info: #17a2b8;
+    }
+
+    body {
+      background: linear-gradient(180deg, var(--bg-warm) 0%, var(--bg-softer) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* Organic shapes and softer corners */
+    .organic-card {
+      background: linear-gradient(135deg, rgba(22, 33, 62, 0.8) 0%, rgba(15, 52, 96, 0.6) 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .organic-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-warm), var(--accent-blue), var(--accent-soft));
+      opacity: 0.6;
+    }
+
+    .organic-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      border-color: rgba(233, 69, 96, 0.2);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 0 0 30px rgba(233, 69, 96, 0.1);
+    }
+
+    /* Warmer, softer buttons */
+    .btn-human {
+      background: linear-gradient(135deg, var(--accent-warm) 0%, #ff6b6b 100%);
+      border-radius: 16px;
+      padding: 12px 24px;
+      font-weight: 500;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: none;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-human::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .btn-human:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-human:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(233, 69, 96, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 12px 24px;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    /* More natural input fields */
+    .input-human {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 14px 20px;
+      font-size: 15px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .input-human:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--accent-warm);
+      box-shadow: 0 0 0 4px rgba(233, 69, 96, 0.15);
+    }
+
+    .input-human::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    /* Warmer navigation */
+    .nav-human {
+      background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.9) 100%);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+    }
+
+    .nav-item-human {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 16px;
+      padding: 14px 20px;
+      margin: 4px 0;
+      position: relative;
+    }
+
+    .nav-item-human::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 0;
+      background: linear-gradient(180deg, var(--accent-warm), var(--accent-blue));
+      border-radius: 0 4px 4px 0;
+      transition: height 0.3s ease;
+    }
+
+    .nav-item-human:hover::before,
+    .nav-item-human.active::before {
+      height: 24px;
+    }
+
+    .nav-item-human:hover {
+      background: rgba(233, 69, 96, 0.1);
+    }
+
+    .nav-item-human.active {
+      background: linear-gradient(135deg, rgba(233, 69, 96, 0.15) 0%, rgba(67, 97, 238, 0.15) 100%);
+      color: white;
+    }
+
+    /* Warmer metrics */
+    .metric-icon {
+      background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-blue) 100%);
+      border-radius: 20px;
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      box-shadow: 0 8px 24px rgba(233, 69, 96, 0.25);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .metric-card:hover .metric-icon {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 12px 32px rgba(233, 69, 96, 0.35);
+    }
+
+    /* Softer table design */
+    .table-human {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .table-human table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .table-human th {
+      background: rgba(26, 26, 46, 0.8);
+      padding: 18px 24px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .table-human td {
+      padding: 16px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      transition: all 0.2s ease;
+    }
+
+    .table-human tr:hover td {
+      background: rgba(233, 69, 96, 0.05);
+    }
+
+    /* Warmer badges and tags */
+    .badge-human {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-new {
+      background: linear-gradient(135deg, rgba(253, 126, 20, 0.2) 0%, rgba(255, 193, 7, 0.2) 100%);
+      color: var(--warning);
+      border: 1px solid rgba(253, 126, 20, 0.3);
+    }
+
+    .badge-resolved {
+      background: linear-gradient(135deg, rgba(32, 201, 151, 0.2) 0%, rgba(40, 167, 69, 0.2) 100%);
+      color: var(--success);
+      border: 1px solid rgba(32, 201, 151, 0.3);
+    }
+
+    .tag-human {
+      background: linear-gradient(135deg, rgba(67, 97, 238, 0.15) 0%, rgba(83, 52, 131, 0.15) 100%);
+      color: var(--accent-blue);
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(67, 97, 238, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .tag-human:hover {
+      background: linear-gradient(135deg, rgba(67, 97, 238, 0.25) 0%, rgba(83, 52, 131, 0.25) 100%);
+      transform: scale(1.05);
+    }
+
+    /* Smoother animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes pulse-soft {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .animate-fadeInUp {
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .animate-slideIn {
+      animation: slideInLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .pulse-soft {
+      animation: pulse-soft 2s ease-in-out infinite;
+    }
+
+    .float-animation {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    /* Staggered animations for cards */
+    .stagger-1 { animation-delay: 0.1s; }
+    .stagger-2 { animation-delay: 0.2s; }
+    .stagger-3 { animation-delay: 0.3s; }
+    .stagger-4 { animation-delay: 0.4s; }
+    .stagger-5 { animation-delay: 0.5s; }
+    .stagger-6 { animation-delay: 0.6s; }
+
+    /* Better header design */
+    .header-human {
+      background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.85) 100%);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Personal greeting */
+    .greeting {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .time-based {
+      color: var(--accent-warm);
+      font-weight: 500;
+    }
+
+    /* Progress indicators */
+    .progress-ring {
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring-circle {
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      transition: stroke-dashoffset 1s ease;
+    }
+
+    /* Better scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, var(--accent-warm), var(--accent-blue));
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #ff6b6b, var(--accent-blue));
+    }
+
+    /* Mobile bottom nav with warmer design */
+    .mobile-nav-human {
+      background: linear-gradient(180deg, rgba(26, 26, 46, 0.98) 0%, rgba(22, 33, 62, 0.95) 100%);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .mobile-nav-item {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 16px;
+      padding: 10px 16px;
+    }
+
+    .mobile-nav-item:active {
+      transform: scale(0.95);
+    }
+
+    .mobile-nav-item.active {
+      background: linear-gradient(135deg, rgba(233, 69, 96, 0.2) 0%, rgba(67, 97, 238, 0.2) 100%);
+    }
+
+    /* Skeleton loading with warmer colors */
+    .skeleton-human {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s ease-in-out infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes skeleton-loading {
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    /* Focus visible for accessibility */
+    :focus-visible {
+      outline: 2px solid var(--accent-warm);
+      outline-offset: 2px;
+    }
+
+    /* Better empty states */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    /* Hover effects for interactive elements */
+    .interactive {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .interactive:active {
+      transform: scale(0.98);
+    }
+
+    /* Better select dropdown */
+    select.input-human {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a8b2d1' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      .desktop-nav {
+        display: none !important;
+      }
+      .mobile-nav {
+        display: flex !important;
+      }
+      .main-content {
+        margin-left: 0 !important;
+        padding-bottom: 100px;
+      }
+    }
+
+    @media (min-width: 1025px) {
+      .mobile-nav {
+        display: none !important;
+      }
+      .desktop-nav {
+        display: flex !important;
+      }
+    }
+
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Touch-friendly sizes */
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  </style>
+</head>
+<body class="antialiased">
+  <!-- Desktop Header -->
+  <header class="header-human fixed top-0 left-0 right-0 z-50 hidden md:block">
+    <div class="flex items-center justify-between px-8 py-5">
+      <div class="flex items-center gap-4">
+        <div class="metric-icon float-animation">
+          <i class="fas fa-shield-heart"></i>
+        </div>
+        <div>
+          <div class="greeting">
+            <span id="greetingTime" class="time-based">Good morning</span>, Admin
+          </div>
+          <h1 class="text-2xl font-bold mt-1">Welcome to <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-blue-500">MovieTayo</span></h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 px-5 py-3 organic-card">
+          <div class="w-3 h-3 rounded-full bg-emerald-400 pulse-soft"></div>
+          <div>
+            <div class="text-xs text-slate-400">System Status</div>
+            <div class="text-sm font-semibold text-emerald-400">All systems operational</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 organic-card px-4 py-3">
+          <input id="token" type="password" placeholder="Enter access token" class="input-human w-40 text-sm">
+          <button id="saveToken" class="btn-human touch-target">
+            <i class="fas fa-key mr-2"></i>Access
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Header -->
+  <header class="header-human fixed top-0 left-0 right-0 z-50 md:hidden">
+    <div class="flex items-center justify-between px-5 py-4">
+      <div class="flex items-center gap-3">
+        <div class="metric-icon" style="width: 44px; height: 44px; font-size: 20px;">
+          <i class="fas fa-shield-heart"></i>
+        </div>
+        <div>
+          <div class="greeting text-xs">
+            <span id="mobileGreetingTime" class="time-based">Good morning</span>
+          </div>
+          <h1 class="text-lg font-bold">Admin Panel</h1>
+        </div>
+      </div>
+
+      <button onclick="toggleTokenModal()" class="w-12 h-12 rounded-2xl organic-card flex items-center justify-center touch-target">
+        <i class="fas fa-key text-slate-400"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Desktop Sidebar -->
+  <aside class="desktop-nav fixed left-0 top-0 bottom-0 w-72 nav-human border-r border-white/8 z-40 pt-28">
+    <nav class="p-5 space-y-2">
+      <div class="nav-item-human active flex items-center gap-4 text-white" data-tab="dashboard">
+        <i class="fas fa-chart-pie w-6 text-center"></i>
+        <span class="font-medium">Dashboard</span>
+      </div>
+      <div class="nav-item-human flex items-center gap-4 text-slate-400" data-tab="reports">
+        <i class="fas fa-inbox w-6 text-center"></i>
+        <span class="font-medium">Reports</span>
+        <span class="ml-auto bg-pink-500/20 text-pink-400 text-xs px-2 py-1 rounded-full">3</span>
+      </div>
+      <div class="nav-item-human flex items-center gap-4 text-slate-400" data-tab="users">
+        <i class="fas fa-users w-6 text-center"></i>
+        <span class="font-medium">Community</span>
+      </div>
+      <div class="nav-item-human flex items-center gap-4 text-slate-400" data-tab="catalog">
+        <i class="fas fa-clapperboard w-6 text-center"></i>
+        <span class="font-medium">Catalog</span>
+      </div>
+      <div class="nav-item-human flex items-center gap-4 text-slate-400" data-tab="behavior">
+        <i class="fas fa-chart-line w-6 text-center"></i>
+        <span class="font-medium">Insights</span>
+      </div>
+    </nav>
+
+    <div class="absolute bottom-6 left-5 right-5 p-5 organic-card">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="metric-icon" style="width: 40px; height: 40px; font-size: 18px;">
+          <i class="fas fa-lightbulb"></i>
+        </div>
+        <span class="font-semibold">Quick Tips</span>
+      </div>
+      <p class="text-xs text-slate-400 leading-relaxed">
+        Use the search to quickly find movies, or check reports for user feedback. Regular updates help maintain data quality.
+      </p>
+    </div>
+  </aside>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-nav-mobile mobile-nav-human fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
+    <div class="flex justify-around py-3 px-2">
+      <div class="mobile-nav-item active flex flex-col items-center" data-tab="dashboard">
+        <i class="fas fa-chart-pie text-xl mb-1"></i>
+        <span class="text-[11px] font-medium">Home</span>
+      </div>
+      <div class="mobile-nav-item flex flex-col items-center text-slate-400" data-tab="reports">
+        <i class="fas fa-inbox text-xl mb-1"></i>
+        <span class="text-[11px] font-medium">Reports</span>
+      </div>
+      <div class="mobile-nav-item flex flex-col items-center text-slate-400" data-tab="users">
+        <i class="fas fa-users text-xl mb-1"></i>
+        <span class="text-[11px] font-medium">People</span>
+      </div>
+      <div class="mobile-nav-item flex flex-col items-center text-slate-400" data-tab="catalog">
+        <i class="fas fa-clapperboard text-xl mb-1"></i>
+        <span class="text-[11px] font-medium">Movies</span>
+      </div>
+      <div class="mobile-nav-item flex flex-col items-center text-slate-400" data-tab="behavior">
+        <i class="fas fa-chart-line text-xl mb-1"></i>
+        <span class="text-[11px] font-medium">Data</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content md:ml-72 min-h-screen pt-24 md:pt-32 px-5 md:px-8 py-6">
+
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="section animate-fadeInUp">
+      <div class="mb-10">
+        <h2 class="text-3xl font-bold mb-2">Dashboard Overview</h2>
+        <p class="text-slate-400">Here's what's happening with your platform today</p>
+      </div>
+
+      <div id="metrics" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5 mb-10">
+        <!-- Metrics will be loaded here -->
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="organic-card p-6">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <div class="metric-icon">
+                <i class="fas fa-masks-theater"></i>
+              </div>
+              <h3 class="font-semibold text-xl">Popular Genres</h3>
+            </div>
+            <button class="text-sm text-slate-400 hover:text-white transition-colors">
+              View All <i class="fas fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+          <div id="topGenres" class="text-slate-400">Loading your data...</div>
+        </div>
+
+        <div class="organic-card p-6">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <div class="metric-icon">
+                <i class="fas fa-star"></i>
+              </div>
+              <h3 class="font-semibold text-xl">Trending Movies</h3>
+            </div>
+            <button class="text-sm text-slate-400 hover:text-white transition-colors">
+              View All <i class="fas fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+          <div id="topMovies" class="text-slate-400">Loading your data...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reports Section -->
+    <section id="reports" class="section hidden animate-fadeInUp">
+      <div class="mb-10">
+        <h2 class="text-3xl font-bold mb-2">User Reports</h2>
+        <p class="text-slate-400">Stay on top of community feedback and issues</p>
+      </div>
+
+      <div class="flex flex-wrap gap-4 mb-6">
+        <select id="reportStatus" class="input-human min-w-[200px]">
+          <option value="">All Reports</option>
+          <option value="new">🆕 New</option>
+          <option value="reviewing">👀 Under Review</option>
+          <option value="resolved">✅ Resolved</option>
+        </select>
+        <button id="refreshReports" class="btn-human touch-target">
+          <i class="fas fa-sync-alt mr-2"></i>Refresh
+        </button>
+      </div>
+
+      <div class="table-human">
+        <table id="reportsTable"></table>
+      </div>
+    </section>
+
+    <!-- Users Section -->
+    <section id="users" class="section hidden animate-fadeInUp">
+      <div class="mb-10">
+        <h2 class="text-3xl font-bold mb-2">Community Members</h2>
+        <p class="text-slate-400">Connect with and manage your user base</p>
+      </div>
+
+      <div class="table-human">
+        <table id="usersTable"></table>
+      </div>
+    </section>
+
+    <!-- Catalog Section -->
+    <section id="catalog" class="section hidden animate-fadeInUp">
+      <div class="mb-10">
+        <h2 class="text-3xl font-bold mb-2">Movie Catalog</h2>
+        <p class="text-slate-400">Search and manage your content library</p>
+      </div>
+
+      <div class="flex flex-wrap gap-4 mb-6">
+        <div class="flex-1 min-w-[300px] relative">
+          <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+          <input id="catalogSearch" type="text" placeholder="Search by title, genre, or keywords..." class="input-human w-full pl-14 pr-6">
+        </div>
+        <button id="refreshCatalog" class="btn-human touch-target">
+          <i class="fas fa-search mr-2"></i>Search
+        </button>
+      </div>
+
+      <div class="table-human">
+        <table id="catalogTable"></table>
+      </div>
+    </section>
+
+    <!-- Behavior Section -->
+    <section id="behavior" class="section hidden animate-fadeInUp">
+      <div class="mb-10">
+        <h2 class="text-3xl font-bold mb-2">User Insights</h2>
+        <p class="text-slate-400">Understand how your community interacts with content</p>
+      </div>
+
+      <div class="table-human">
+        <table id="behaviorTable"></table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Mobile Token Modal -->
+  <div id="tokenModal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="toggleTokenModal()"></div>
+    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-900 to-slate-800/95 rounded-t-3xl p-6 safe-area-bottom animate-slideIn">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold">Admin Access</h3>
+        <button onclick="toggleTokenModal()" class="w-10 h-10 rounded-full organic-card flex items-center justify-center touch-target">
+          <i class="fas fa-times text-slate-400"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <input id="mobileToken" type="password" placeholder="Enter your admin token" class="input-human w-full">
+        <button onclick="saveMobileToken()" class="btn-human w-full touch-target">
+          <i class="fas fa-unlock mr-2"></i>Unlock Access
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const tokenInput = $('token');
+    tokenInput.value = localStorage.getItem('movietayo.admin.token') || 'admin';
+
+    // Time-based greeting
+    function updateGreeting() {
+      const hour = new Date().getHours();
+      let greeting = 'Good evening';
+      if (hour < 12) greeting = 'Good morning';
+      else if (hour < 18) greeting = 'Good afternoon';
+
+      const greetingEl = $('greetingTime');
+      const mobileGreetingEl = $('mobileGreetingTime');
+      if (greetingEl) greetingEl.textContent = greeting;
+      if (mobileGreetingEl) mobileGreetingEl.textContent = greeting;
+    }
+    updateGreeting();
+
+    function headers() {
+      return { 'Content-Type': 'application/json', 'X-Admin-Token': tokenInput.value };
+    }
+
+    async function api(path, options = {}) {
+      const baseUrl = window.MOVIETAYO_API_BASE || '';
+      const url = baseUrl + path;
+      const res = await fetch(url, { headers: headers(), ...options });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
+
+    function esc(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function renderTable(id, columns, rows) {
+      const table = $(id);
+      if (!rows || rows.length === 0) {
+        table.innerHTML = `
+          <tr>
+            <td colspan="${columns.length}">
+              <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No data available yet</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      table.innerHTML = `
+        <thead><tr>${columns.map((col) => `<th>${esc(col.label)}</th>`).join('')}</tr></thead>
+        <tbody>${rows.map((row) => `<tr class="interactive">${columns.map((col) => `<td>${col.render ? col.render(row) : esc(row[col.key])}</td>`).join('')}</tr>`).join('')}</tbody>
+      `;
+    }
+
+    function pills(items, key = 'genre') {
+      return (items || []).map((item) => `<span class="tag-human">${esc(item[key])} ${item.count ? `<span class="text-slate-400 ml-1">(${item.count})</span>` : ''}</span>`).join('') || '<span class="text-slate-500 text-sm">No data yet</span>';
+    }
+
+    async function loadDashboard() {
+      try {
+        const data = await api('/api/admin/stats');
+        const metricDefs = [
+          ['Catalog Size', data.catalog_items, 'fa-film', 'from-pink-500 to-rose-500'],
+          ['Community', data.users, 'fa-users', 'from-violet-500 to-purple-500'],
+          ['Saved Items', data.saved_items, 'fa-bookmark', 'from-cyan-500 to-blue-500'],
+          ['Open Reports', data.open_reports, 'fa-flag', 'from-orange-500 to-red-500'],
+          ['Interactions', data.behavior_events, 'fa-heart', 'from-green-500 to-emerald-500'],
+          ['Total Reports', data.reports, 'fa-clipboard-list', 'from-blue-500 to-indigo-500'],
+        ];
+
+        $('metrics').innerHTML = metricDefs.map(([label, value, icon, gradient], index) => `
+          <div class="organic-card p-5 animate-fadeInUp stagger-${(index % 6) + 1}">
+            <div class="flex items-start justify-between mb-4">
+              <div class="metric-icon" style="width: 48px; height: 48px; font-size: 20px; background: linear-gradient(135deg, ${gradient.replace('from-', '#').replace(' to-', ', #')});">
+                <i class="fas ${icon}"></i>
+              </div>
+              <span class="text-xs text-slate-400 bg-white/5 px-2 py-1 rounded-full">${label.split(' ')[0]}</span>
+            </div>
+            <p class="text-slate-400 text-sm mb-2">${esc(label)}</p>
+            <div class="text-3xl font-bold">${esc(value)}</div>
+          </div>
+        `).join('');
+
+        $('topGenres').innerHTML = pills(data.top_genres);
+        $('topMovies').innerHTML = (data.top_movies || []).map((item, index) => `
+          <div class="flex items-center gap-4 py-3 border-b border-white/5 last:border-0 hover:bg-white/5 rounded-lg px-2 transition-colors">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-blue-500 flex items-center justify-center text-sm font-bold text-white">
+              ${index + 1}
+            </div>
+            <div class="flex-1">
+              <div class="font-medium">${esc(item.title)}</div>
+              <div class="text-xs text-slate-400">${item.saved_count} people saved this</div>
+            </div>
+            <i class="fas fa-chevron-right text-slate-500"></i>
+          </div>
+        `).join('') || '<div class="empty-state"><i class="fas fa-film"></i><p>No movies saved yet</p></div>';
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+        $('metrics').innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">Unable to load dashboard data. Please check your connection.</div>';
+      }
+    }
+
+    async function loadReports() {
+      try {
+        const status = $('reportStatus').value;
+        const data = await api(`/api/admin/reports?status=${status}`);
+        renderTable('reportsTable', [
+          { label: 'ID', key: 'id' },
+          { label: 'From', key: 'user_id' },
+          { label: 'Type', key: 'report_type' },
+          { label: 'Status', key: 'status', render: (row) => `<span class="badge-human badge-${esc(row.status)}"><i class="fas fa-circle text-[8px] mr-1"></i>${esc(row.status)}</span>` },
+          { label: 'Message', key: 'message', render: (row) => `<span class="text-sm max-w-xs block truncate">${esc(row.message)}</span>` },
+          { label: 'Date', key: 'created_at' },
+        ], data.reports || []);
+      } catch (error) {
+        console.error('Error loading reports:', error);
+      }
+    }
+
+    async function loadUsers() {
+      try {
+        const data = await api('/api/admin/users');
+        renderTable('usersTable', [
+          { label: 'ID', key: 'id' },
+          { label: 'Name', key: 'username' },
+          { label: 'Email', key: 'email' },
+          { label: 'Joined', key: 'created_at' },
+          { label: 'Status', key: 'is_active', render: (row) => row.is_active ? '<span class="badge-human" style="background: rgba(32, 201, 151, 0.2); color: #20c997; border-color: rgba(32, 201, 151, 0.3);"><i class="fas fa-circle text-[8px] mr-1"></i>Active</span>' : '<span class="badge-human" style="background: rgba(220, 53, 69, 0.2); color: #dc3545; border-color: rgba(220, 53, 69, 0.3);"><i class="fas fa-circle text-[8px] mr-1"></i>Inactive</span>' },
+        ], data.users || []);
+      } catch (error) {
+        console.error('Error loading users:', error);
+      }
+    }
+
+    async function loadCatalog() {
+      try {
+        const search = $('catalogSearch').value;
+        const data = await api(`/api/admin/catalog?q=${encodeURIComponent(search)}`);
+        renderTable('catalogTable', [
+          { label: 'ID', key: 'id' },
+          { label: 'Title', key: 'title' },
+          { label: 'Type', key: 'content_type' },
+          { label: 'Year', key: 'year' },
+          { label: 'Genres', key: 'genres', render: (row) => pills(row.genres) },
+        ], data.items || []);
+      } catch (error) {
+        console.error('Error loading catalog:', error);
+      }
+    }
+
+    async function loadBehavior() {
+      try {
+        const data = await api('/api/admin/behavior');
+        renderTable('behaviorTable', [
+          { label: 'ID', key: 'id' },
+          { label: 'User', key: 'user_id' },
+          { label: 'Action', key: 'action_type' },
+          { label: 'Content', key: 'content_id' },
+          { label: 'Time', key: 'timestamp' },
+        ], data.events || []);
+      } catch (error) {
+        console.error('Error loading behavior:', error);
+      }
+    }
+
+    // Tab switching with smoother transitions
+    document.querySelectorAll('.nav-item-human, .mobile-nav-item').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const tab = this.dataset.tab;
+        if (!tab) return;
+
+        // Update nav items
+        document.querySelectorAll('.nav-item-human, .mobile-nav-item').forEach(b => {
+          b.classList.remove('active');
+          if (!b.classList.contains('text-slate-400') && !b.querySelector('.text-slate-400')) {
+            b.classList.add('text-slate-400');
+          }
+        });
+
+        document.querySelectorAll(`[data-tab="${tab}"]`).forEach(b => {
+          b.classList.add('active');
+          b.classList.remove('text-slate-400');
+        });
+
+        // Update sections with animation
+        document.querySelectorAll('.section').forEach(s => {
+          s.classList.add('hidden');
+          s.classList.remove('animate-fadeInUp');
+        });
+
+        const section = $(tab);
+        section.classList.remove('hidden');
+        // Trigger reflow for animation
+        void section.offsetWidth;
+        section.classList.add('animate-fadeInUp');
+
+        // Load data for the tab
+        if (tab === 'dashboard') loadDashboard();
+        if (tab === 'reports') loadReports();
+        if (tab === 'users') loadUsers();
+        if (tab === 'catalog') loadCatalog();
+        if (tab === 'behavior') loadBehavior();
+      });
+    });
+
+    // Event listeners
+    $('saveToken').addEventListener('click', () => {
+      localStorage.setItem('movietayo.admin.token', tokenInput.value);
+      loadDashboard();
+    });
+
+    $('refreshReports').addEventListener('click', loadReports);
+    $('reportStatus').addEventListener('change', loadReports);
+    $('refreshCatalog').addEventListener('click', loadCatalog);
+    $('catalogSearch').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') loadCatalog();
+    });
+
+    // Mobile token modal
+    function toggleTokenModal() {
+      const modal = $('tokenModal');
+      modal.classList.toggle('hidden');
+    }
+
+    function saveMobileToken() {
+      const token = $('mobileToken').value;
+      localStorage.setItem('movietayo.admin.token', token);
+      tokenInput.value = token;
+      toggleTokenModal();
+      loadDashboard();
+    }
+
+    // Initial load
+    loadDashboard();
+  </script>
+</body>
+</html>

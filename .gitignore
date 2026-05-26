@@ -20,6 +20,15 @@ android/.gradle/
 android/build/
 android/app/build/
 android/local.properties
+android-admin/.gradle/
+android-admin/build/
+android-admin/app/build/
+android-admin/local.properties
+
+# Node
+node_modules/
+admin-app/node_modules/
+admin-app/dist/
 
 # IDE and local tooling
 .idea/

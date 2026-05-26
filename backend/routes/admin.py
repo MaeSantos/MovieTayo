@@ -40,6 +40,10 @@ def parse_context(value: str | None) -> dict:
         return {}
 
 
+def split_genres(value: str | None) -> list[str]:
+    return [genre.strip() for genre in str(value or "").split(",") if genre.strip()]
+
+
 @router.post("/reports")
 def create_report(report: ReportCreate):
     db: Session = SessionLocal()
@@ -170,7 +174,15 @@ def admin_users(x_admin_token: str | None = Header(default=None)):
         for user_id, counter in genre_counts.items():
             data[user_id]["top_genres"] = [{"genre": genre, "count": count} for genre, count in counter.most_common(5)]
 
-        return sorted(data.values(), key=lambda row: row["user_id"])
+        rows = sorted(data.values(), key=lambda row: row["user_id"])
+        for index, row in enumerate(rows, start=1):
+            row["id"] = index
+            row["username"] = row["user_id"]
+            row["email"] = f"{row['user_id']}@local.movietayo"
+            row["is_active"] = True
+            row["created_at"] = None
+
+        return {"users": rows}
     finally:
         db.close()
 
@@ -189,18 +201,27 @@ def admin_catalog(q: str = "", limit: int = 80, x_admin_token: str | None = Head
                 | (ContentItem.keywords.ilike(pattern))
             )
         rows = query.order_by(ContentItem.title.asc()).limit(max(1, min(limit, 250))).all()
-        return [
+        rows = [
             {
                 "id": item.id,
                 "kind": item.kind,
+                "content_type": item.kind,
                 "title": item.title,
                 "genres": item.genres,
+                "year": "",
+                "has_poster": bool(item.poster_data_url or item.image_url),
+                "genre_names": split_genres(item.genres),
                 "keywords": item.keywords,
                 "has_image_url": bool(item.image_url),
                 "has_poster_data": bool(item.poster_data_url),
             }
             for item in rows
         ]
+
+        for row in rows:
+            row["genres"] = [{"genre": genre} for genre in row.pop("genre_names")]
+
+        return {"items": rows}
     finally:
         db.close()
 
@@ -217,19 +238,22 @@ def admin_behavior(limit: int = 100, x_admin_token: str | None = Header(default=
             .limit(max(1, min(limit, 300)))
             .all()
         )
-        return [
+        rows = [
             {
                 "id": behavior.id,
                 "user_id": behavior.user_id,
                 "content_id": behavior.content_id,
                 "title": title,
                 "interaction_type": behavior.interaction_type,
+                "action_type": behavior.interaction_type,
                 "dwell_time": behavior.dwell_time,
                 "context": parse_context(behavior.context),
                 "created_at": behavior.created_at.isoformat() if behavior.created_at else None,
+                "timestamp": behavior.created_at.isoformat() if behavior.created_at else None,
             }
             for behavior, title in rows
         ]
+        return {"events": rows}
     finally:
         db.close()
 
@@ -243,11 +267,12 @@ def admin_reports(status: str = "", x_admin_token: str | None = Header(default=N
         if status:
             query = query.filter(UserReport.status == status)
         rows = query.order_by(UserReport.created_at.desc()).limit(200).all()
-        return [
+        rows = [
             {
                 "id": row.id,
                 "user_id": row.user_id,
                 "category": row.category,
+                "report_type": row.category,
                 "message": row.message,
                 "status": row.status,
                 "created_at": row.created_at.isoformat() if row.created_at else None,
@@ -255,6 +280,7 @@ def admin_reports(status: str = "", x_admin_token: str | None = Header(default=N
             }
             for row in rows
         ]
+        return {"reports": rows}
     finally:
         db.close()
 

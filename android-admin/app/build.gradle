@@ -1,0 +1,27 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace "com.mae.movieadmin"
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.mae.movieadmin"
+        minSdk 23
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main {
+            assets.srcDirs = ["../../admin"]
+        }
+    }
+}

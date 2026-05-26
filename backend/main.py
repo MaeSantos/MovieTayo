@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import os
 
@@ -29,11 +30,23 @@ app.include_router(admin.router, prefix="/api")
 def health():
     return {"ok": True}
 
-# Serve Frontend static files from the root /
+# Serve admin SPA and static files.
 admin_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "admin")
 if os.path.exists(admin_path):
-    app.mount("/admin", StaticFiles(directory=admin_path, html=True), name="admin")
+    @app.get("/admin")
+    @app.get("/admin/")
+    def admin_index():
+        return FileResponse(os.path.join(admin_path, "index.html"))
 
+    @app.get("/admin/{path:path}")
+    def admin_file_or_spa(path: str):
+        requested = os.path.abspath(os.path.join(admin_path, path))
+        admin_root = os.path.abspath(admin_path)
+        if requested.startswith(admin_root) and os.path.isfile(requested):
+            return FileResponse(requested)
+        return FileResponse(os.path.join(admin_path, "index.html"))
+
+# Serve Frontend static files from the root /
 frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 if os.path.exists(frontend_path):
     app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
