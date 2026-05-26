@@ -45,7 +45,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="movietayo-admin-theme">
-        <BrowserRouter>
+        <BrowserRouter basename="/admin">
           <Toaster position="top-right" richColors />
           <Routes>
             <Route path="/login" element={<LoginPage />} />

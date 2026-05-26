@@ -11,6 +11,7 @@ $ConfigScript = Join-Path $Root "set_api_url.ps1"
 $Adb = Join-Path $env:LOCALAPPDATA "Android\Sdk\platform-tools\adb.exe"
 $AdminRoot = Join-Path $Root "android-admin"
 $DebugApk = Join-Path $AdminRoot "app\build\outputs\apk\debug\app-debug.apk"
+$AndroidHome = Join-Path $env:LOCALAPPDATA "Android\Sdk"
 $GradleWrapper = Join-Path $AdminRoot "gradlew.bat"
 $UserGradle = Join-Path $env:USERPROFILE ".gradle\wrapper\dists\gradle-8.14.3-all\10utluxaxniiv4wxiphsi49nj\gradle-8.14.3\bin\gradle.bat"
 $Gradle = if (Test-Path $GradleWrapper) { $GradleWrapper } elseif (Test-Path $UserGradle) { $UserGradle } else { $null }
@@ -21,14 +22,15 @@ if ($Ngrok) {
 } else {
     & $BackendScript
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    & $ConfigScript -Url ""
 }
 
 # Copy admin API config
 $AdminApiConfig = Join-Path $AdminRoot "app\src\main\assets\api-config.js"
 $FrontendApiConfig = Join-Path $Root "frontend\api-config.js"
-if (Test-Path $FrontendApiConfig) {
+if ($Ngrok -and (Test-Path $FrontendApiConfig)) {
     Copy-Item $FrontendApiConfig $AdminApiConfig -Force
+} else {
+    Set-Content -Path $AdminApiConfig -Value 'window.MOVIETAYO_API_BASE = "http://127.0.0.1:8001";' -Encoding ASCII
 }
 
 if (Test-Path $Adb) {
@@ -37,7 +39,7 @@ if (Test-Path $Adb) {
         $hasDevice = $devices | Where-Object { $_ -match "`tdevice$" } | Select-Object -First 1
         if (-not $hasDevice) {
             Write-Host "Backend is ready. Android admin launch skipped: no connected device."
-            Write-Host "Desktop admin: $Root\admin\index.html"
+            Write-Host "Desktop admin: http://127.0.0.1:8001/admin/"
             exit 0
         }
 
@@ -47,6 +49,8 @@ if (Test-Path $Adb) {
             }
 
             $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+            $env:ANDROID_HOME = $AndroidHome
+            $env:ANDROID_SDK_ROOT = $AndroidHome
             Push-Location $AdminRoot
             try {
                 & $Gradle assembleDebug
@@ -67,4 +71,4 @@ if (Test-Path $Adb) {
     }
 }
 
-Write-Host "Desktop admin: $Root\admin\index.html"
+Write-Host "Desktop admin: http://127.0.0.1:8001/admin/"

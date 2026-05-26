@@ -7,16 +7,20 @@
     <meta name="description" content="MovieTayo Admin Dashboard" />
     <meta name="theme-color" content="#0f172a" />
 
-    <!-- PWA -->
-    <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./Logo.png" />
 
     <title>MovieTayo Admin</title>
-    <script type="module" crossorigin src="./assets/index-C-HnNIqx.js"></script>
+    <script>
+      if (window.location.protocol === 'file:') {
+        window.location.replace('http://127.0.0.1:8001/admin/');
+      }
+    </script>
+    <script type="module" crossorigin src="./assets/index-B8BFpMlF.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/react-vendor-Cch0ERkc.js">
     <link rel="modulepreload" crossorigin href="./assets/ui-vendor-DbwOW-mR.js">
     <link rel="modulepreload" crossorigin href="./assets/charts-vendor-BLulOhWV.js">
     <link rel="stylesheet" crossorigin href="./assets/index-D5nifSDf.css">
+    <link rel="manifest" href="./manifest.webmanifest">
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -27,6 +31,5 @@
   </head>
   <body>
     <div id="root"></div>
-
   </body>
 </html>
